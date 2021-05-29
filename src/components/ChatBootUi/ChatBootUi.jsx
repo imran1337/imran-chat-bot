@@ -15,37 +15,62 @@ const useStyles = makeStyles({
     margin: "0 auto",
     fontSize: 14,
     position: "relative",
+    overflowY: "scroll",
   },
   bot: {
-    display: "block",
+    display: "inline-block",
     textAlign: "left",
+    background: "red",
+    margin: "10px 0",
+    padding: "10px",
+    borderRadius: "10px",
   },
   user: {
-    display: "block",
+    display: "inline-block",
     textAlign: "right",
+    background: "green",
+    margin: "10px 0",
+    padding: "10px",
+    borderRadius: "10px",
   },
   messageForm: {
-    position: "absolute",
-    bottom: 0,
+    width: 450,
+    margin: "0 auto",
     display: "flex",
+    justifyContent: "center",
     alignItems: "center",
   },
   messageInput: {
-    width: "400px",
+    width: "100vw",
+    maxWidth: 370,
+    margin: "0 auto",
+    padding: "10px",
+  },
+  iconSize: {
+    width: 50,
+    height: 50,
+  },
+  alignRight: {
+    textAlign: "right",
+  },
+  alignLeft: {
+    textAlign: "left",
   },
 });
 
-const ChatBootUi = () => {
+const ChatBootUi = ({ userMessage, sendMessageNow,setTypedMessage }) => {
   const classes = useStyles();
 
-  const [userMessage, setUserMessage] = useState([]);
   const inputValue = useRef();
+
+  const testFunc = (value) => {
+    // setTypedMessage({ source: "user", text: value });
+    sendMessageNow({ source: "user", text: value })
+  };
 
   const userMsgHandler = () => {
     const value = inputValue.current.value;
-    value === ""
-      ? alert("Please add some value")
-      : setUserMessage([...userMessage, value]);
+    value === "" ? alert("Please Type Message Boss") : testFunc(value);
     inputValue.current.value = "";
   };
 
@@ -54,35 +79,46 @@ const ChatBootUi = () => {
       <Card className={classes.root}>
         <CardContent>
           <Typography variant="h5" component="h2">
-            {userMessage !== 0 &&
-              userMessage.map((msg) => (
-                <span className={classes.user}> {msg}</span>
-              ))}
-          </Typography>
-          <Typography variant="h5" component="h2">
-            <span className={classes.bot}>Hi There</span>
+            {userMessage.length !== 0 &&
+              userMessage.map((msg) => {
+                const { source, text } = msg;
+                return (
+                  <div
+                    className={
+                      source === "user" ? classes.alignRight : classes.alignLeft
+                    }
+                  >
+                    <span
+                      className={source === "user" ? classes.user : classes.bot}
+                    >
+                      {text}
+                    </span>
+                  </div>
+                );
+              })}
           </Typography>
         </CardContent>
-        <CardActions>
-          <div className={classes.messageForm}>
-            <Grid container alignItems="center">
-              <Grid item>
-                <input
-                  className={classes.messageInput}
-                  id="input-with-icon-grid"
-                  label="Type Message"
-                  ref={inputValue}
-                  onKeyPress={(e) => e.key === "Enter" && userMsgHandler()}
-                  placeholder="Type Message"
-                />
-              </Grid>
-              <Grid item>
-                <SendIcon onClick={userMsgHandler} />
-              </Grid>
-            </Grid>
-          </div>
-        </CardActions>
       </Card>
+      <div className={classes.messageForm}>
+        <Grid container alignItems="center">
+          <Grid item>
+            <input
+              className={classes.messageInput}
+              id="input-with-icon-grid"
+              label="Type Message"
+              ref={inputValue}
+              onKeyPress={(e) => e.key === "Enter" && userMsgHandler()}
+              placeholder="Type Message"
+            />
+          </Grid>
+          <Grid item>
+            <SendIcon
+              className={classes.iconSize}
+              onClick={() => userMsgHandler()}
+            />
+          </Grid>
+        </Grid>
+      </div>
     </div>
   );
 };
