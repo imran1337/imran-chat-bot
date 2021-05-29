@@ -6,6 +6,9 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { Grid, Input, InputAdornment, TextField } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
+
+import { useSelector, useDispatch } from "react-redux";
+
 // https://www.freecodecamp.org/news/design-imessage-like-chat-bubble-react-native/
 const useStyles = makeStyles({
   root: {
@@ -58,19 +61,15 @@ const useStyles = makeStyles({
   },
 });
 
-const ChatBootUi = ({ userMessage, sendMessageNow,setTypedMessage }) => {
+const ChatBootUi = ({ sendMessageNow }) => {
+    const myState = useSelector((state) => state.messagesList);
   const classes = useStyles();
 
   const inputValue = useRef();
 
-  const testFunc = (value) => {
-    // setTypedMessage({ source: "user", text: value });
-    sendMessageNow({ source: "user", text: value })
-  };
-
   const userMsgHandler = () => {
     const value = inputValue.current.value;
-    value === "" ? alert("Please Type Message Boss") : testFunc(value);
+    value === "" ? alert("Please Type Message Boss") : sendMessageNow(value);
     inputValue.current.value = "";
   };
 
@@ -79,8 +78,8 @@ const ChatBootUi = ({ userMessage, sendMessageNow,setTypedMessage }) => {
       <Card className={classes.root}>
         <CardContent>
           <Typography variant="h5" component="h2">
-            {userMessage.length !== 0 &&
-              userMessage.map((msg) => {
+            {myState.length !== 0 &&
+                myState.map((msg) => {
                 const { source, text } = msg;
                 return (
                   <div

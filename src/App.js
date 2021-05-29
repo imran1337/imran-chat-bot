@@ -1,14 +1,15 @@
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { SocketClient } from "@cognigy/socket-client";
 import ChatBootUi from "./components/ChatBootUi/ChatBootUi";
+import { useSelector, useDispatch } from "react-redux";
+import { allMessages, storeBotMessage, storeUserMessage } from "./redux/actions/index";
 
 function App() {
-  const [userMessage, setUserMessage] = useState([
-    { source: "bot", text: "Hello M.R Chris, How are you?" },
-  ]);
+  const myState = useSelector((state) => state.messagesList);
+  const dispatch = useDispatch();
 
-  const [typedMessage, setTypedMessage] = useState({});
+  console.log(myState);
 
   const client = new SocketClient(
     "https://endpoint-trial.cognigy.ai",
@@ -19,17 +20,14 @@ function App() {
     }
   );
 
-  const getBot = async (inputValue) => {
+  const getBot = async () => {
     try {
       client.on("output", (output) => {
-        console.log(output);
-        const { source, text } = output;
-        inputValue?.text &&
-          setUserMessage([...userMessage, { ...inputValue }, { source, text }]);
+        const {text } = output;
+        dispatch(storeBotMessage(text));
       });
 
       await client.connect();
-
     } catch (error) {
       console.log(error);
     }
@@ -38,27 +36,25 @@ function App() {
   const sendMessageNow = async (inputText) => {
     try {
       console.log(inputText);
-      setUserMessage([...userMessage, { ...inputText }]);
-      await getBot(inputText);
-      client.sendMessage(inputText.text || "hello");
-    } catch (error) {}
+      dispatch(storeUserMessage(inputText));
+      await getBot();
+      client.sendMessage(inputText || alert('something went wrong'));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     console.log(client);
-    console.log(userMessage);
-    console.log(typedMessage);
   });
 
   return (
     <section className="App">
-      <h1 style={{ fontSize: "60px" }}>Imran ChatBot</h1>
+      <h1 style={{ fontSize: "60px" }} onClick={() => dispatch(allMessages())}>
+        Imran ChatBot
+      </h1>
       <div>
-        <ChatBootUi
-          userMessage={userMessage}
-          sendMessageNow={sendMessageNow}
-          setTypedMessage={setTypedMessage}
-        />
+        <ChatBootUi sendMessageNow={sendMessageNow} />
       </div>
     </section>
   );
